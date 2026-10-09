@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Зарплата в Польше — калькулятор на руки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Сколько останется на руки</h1>
+      <p>Калькулятор зарплаты в Польше: ZUS, składka zdrowotna, PIT и льготы, включая ulga na powrót.</p>
+    </div>
+    <div class="year">Актуальные ставки</div>
+  </header>
+
+  <div class="app">
+    <!-- CONTROLS -->
+    <form class="panel controls" id="f" onsubmit="return false">
+      <div class="group">
+        <span class="label" id="lbl-form">Тип занятости</span>
+        <div class="seg" role="radiogroup" aria-labelledby="lbl-form">
+          <input type="radio" name="form" id="fm-uop" value="uop"><label for="fm-uop">Umowa o pracę<small>трудовой договор</small></label>
+          <input type="radio" name="form" id="fm-b2b" value="b2b"><label for="fm-b2b">B2B / JDG<small>своя фирма</small></label>
+          <input type="radio" name="form" id="fm-zl" value="zlecenie"><label for="fm-zl">Umowa zlecenie<small>гражданский договор</small></label>
+          <input type="radio" name="form" id="fm-dz" value="dzielo"><label for="fm-dz">Umowa o dzieło<small>договор подряда</small></label>
+        </div>
+      </div>
+
+      <div class="group" data-for="uop zlecenie dzielo">
+        <label class="label" for="gross">Зарплата брутто в месяц</label>
+        <div class="money"><input id="gross" inputmode="decimal" autocomplete="off"><span>zł</span></div>
+      </div>
+
+      <div class="group" data-for="b2b">
+        <label class="label" for="rev">Сумма на фактуре (netto) в месяц</label>
+        <div class="money"><input id="rev" inputmode="decimal" autocomplete="off"><span>zł</span></div>
+        <div class="sub">
+          <label class="label" for="cost" style="font-weight:500;font-size:14px;margin-bottom:6px;display:block">Расходы фирмы в месяц</label>
+          <div class="money"><input id="cost" class="small" inputmode="decimal" autocomplete="off"><span>zł</span></div>
+          <div class="hint">Бухгалтерия, ноутбук, интернет. На ryczałt расходы налог не уменьшают.</div>
+        </div>
+      </div>
+
+      <div class="group">
+        <label class="label" for="start">Начало работы в текущем году</label>
+        <select id="start"></select>
+        <div class="hint">Если начали не с января, посчитаем только отработанные месяцы.</div>
+      </div>
+
+      <div class="group" data-for="b2b">
+        <span class="label" id="lbl-tax">Форма налогообложения</span>
+        <div class="seg three" role="radiogroup" aria-labelledby="lbl-tax">
+          <input type="radio" name="b2bTax" id="tx-lin" value="liniowy"><label for="tx-lin">Liniowy<small>19%</small></label>
+          <input type="radio" name="b2bTax" id="tx-ryc" value="ryczalt"><label for="tx-ryc">Ryczałt<small>% от выручки</small></label>
+          <input type="radio" name="b2bTax" id="tx-sk" value="skala"><label for="tx-sk">Skala<small>12% / 32%</small></label>
+        </div>
+        <div class="sub" id="rycWrap">
+          <label class="label" for="rycRate" style="font-weight:500;font-size:14px;margin-bottom:6px;display:block">Ставка ryczałtu</label>
+          <select id="rycRate">
+            <option value="12">12% — программирование, IT-услуги</option>
+            <option value="8.5">8,5% — многие другие услуги</option>
+            <option value="14">14% — медицинские, архитектурные</option>
+            <option value="15">15% — консалтинг, реклама и др.</option>
+            <option value="5.5">5,5% — производство, строительство</option>
+            <option value="3">3% — торговля</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="group" data-for="b2b">
+        <span class="label" id="lbl-zus">Взносы ZUS</span>
+        <div class="seg three" role="radiogroup" aria-labelledby="lbl-zus">
+          <input type="radio" name="zusStage" id="zs-start" value="start"><label for="zs-start">Ulga na start<small>первые 6 мес.</small></label>
+          <input type="radio" name="zusStage" id="zs-pref" value="pref"><label for="zs-pref">Preferencyjny<small>следующие 24 мес.</small></label>
+          <input type="radio" name="zusStage" id="zs-full" value="full"><label for="zs-full">Pełny<small>обычный</small></label>
+        </div>
+      </div>
+
+      <div class="group">
+        <span class="label">Льготы и настройки</span>
+
+        <label class="toggle" data-for="uop zlecenie">
+          <span class="t">PIT-2 подан</span>
+          <span class="switch"><input type="checkbox" id="pit2"><span></span></span>
+          <span class="hint">Налог каждый месяц меньше на 300 zł (kwota wolna 30 000 zł в год).</span>
+        </label>
+
+        <label class="toggle" data-for="uop zlecenie b2b">
+          <span class="t">Ulga na powrót</span>
+          <span class="switch"><input type="checkbox" id="powrot"><span></span></span>
+          <span class="hint">До 85 528 zł дохода в год без PIT, 4 года подряд. ZUS и zdrowotna остаются.</span>
+        </label>
+
+        <label class="toggle" data-for="uop zlecenie">
+          <span class="t">Ulga dla młodych</span>
+          <span class="switch"><input type="checkbox" id="mlodzi"><span></span></span>
+          <span class="hint">Если вам нет 26 лет. Лимит 85 528 zł общий с ulga na powrót.</span>
+        </label>
+
+        <label class="toggle" data-for="zlecenie">
+          <span class="t">Студент до 26 лет</span>
+          <span class="switch"><input type="checkbox" id="student"><span></span></span>
+          <span class="hint">Без ZUS и składki zdrowotnej, PIT по ulga dla młodych.</span>
+        </label>
+
+        <label class="toggle" data-for="zlecenie">
+          <span class="t">Добровольное chorobowe</span>
+          <span class="switch"><input type="checkbox" id="zlChor"><span></span></span>
+          <span class="hint">2,45% брутто — дают право на больничный.</span>
+        </label>
+
+        <label class="toggle" data-for="b2b">
+          <span class="t">Добровольное chorobowe</span>
+          <span class="switch"><input type="checkbox" id="b2bChor"><span></span></span>
+          <span class="hint">Дают право на больничный. На ulga na start не платится.</span>
+        </label>
+
+        <label class="toggle" data-for="uop">
+          <span class="t">Работаю не в том городе, где живу</span>
+          <span class="switch"><input type="checkbox" id="kup300"><span></span></span>
+          <span class="hint">Расходы на доезд 300 zł вместо 250 zł в месяц.</span>
+        </label>
+
+        <label class="toggle" data-for="uop">
+          <span class="t">PPK</span>
+          <span class="switch"><input type="checkbox" id="ppk"><span></span></span>
+          <span class="hint">Пенсионная программа: 2% от вас + 1,5% от работодателя. Взнос работодателя облагается PIT.</span>
+        </label>
+
+        <label class="toggle" data-for="dzielo">
+          <span class="t">Авторский договор (50% KUP)</span>
+          <span class="switch"><input type="checkbox" id="dzAut"><span></span></span>
+          <span class="hint">Расходы 50% вместо 20%, если результат — объект авторского права.</span>
+        </label>
+      </div>
+
+      <div class="group" data-for="uop">
+        <label class="label" for="aut">Доля авторской работы (50% KUP)</label>
+        <div class="range"><input type="range" id="aut" min="0" max="100" step="5"><output id="autOut" class="num">0%</output></div>
+        <div class="hint">Если в договоре есть prawa autorskie (часто в IT). Лимит 120 000 zł расходов в год.</div>
+      </div>
+    </form>
+
+    <!-- RESULTS -->
+    <main class="stack" aria-live="polite">
+      <section class="panel hero">
+        <div class="cap" id="capLine">На руки в среднем за месяц</div>
+        <div class="big num" id="netBig">—</div>
+        <div class="facts" id="facts"></div>
+        <div class="bar" id="bar" aria-hidden="true"></div>
+        <div class="legend" id="legend"></div>
+        <div id="notes"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Из чего складывается</h2>
+        <div class="scroll"><table class="breakdown" id="breakdown"></table></div>
+      </section>
+
+      <section class="panel" id="monthlyPanel">
+        <h2>По месяцам</h2>
+        <div class="scroll"><table id="monthly"></table></div>
+      </section>
+
+      <section class="foot">
+        <p>Расчёт ориентировочный и не заменяет консультацию бухгалтера. Используются параметры 2026 года: płaca minimalna 4806 zł, лимит 30-кратности ZUS 282 600 zł, пороги PIT 12% / 32% (120 000 zł), kwota wolna 30 000 zł, минимальная zdrowotna 432,54 zł, лимит вычета zdrowotnej на liniowym 14 100 zł.</p>
+        <p>Для umowy o pracę и zlecenia калькулятор повторяет то, как считает бухгалтерия каждый месяц, а затем делает годовой перерасчёт как в PIT-37. Взносы ZUS с освобождённой части дохода в течение года не вычитаются, поэтому при ulga na powrót обычно получается возврат. Для B2B расчёт годовой, с равными доходами каждый месяц; Mały ZUS Plus и совмещение с работой по найму не учитываются.</p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
